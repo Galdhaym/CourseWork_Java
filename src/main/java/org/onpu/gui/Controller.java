@@ -11,54 +11,51 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.onpu.VirtualMachineLauncher;
 import org.onpu.vm.*;
 import org.onpu.vm.process.Process;
-import org.onpu.vm.memory.MemoryManager;
-import org.onpu.vm.time.ClockGenerator;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class Controller {
     @FXML
     private void initialize()
     {
-        queueTable.getColumns().setAll(genQTable());
-        rejectedTable.getColumns().setAll(genQTable());
-        doneTable.getColumns().setAll(genQTable());
+        queueTable.getColumns().setAll(initQueueTable());
+        doneTable.getColumns().setAll(initQueueTable());
     }
     @FXML
     TableView<Process> queueTable;
     @FXML
-    TableView<Process> rejectedTable;
-    @FXML
     TableView<Process> doneTable;
 
-    ObservableList<Process> qTableList = FXCollections.observableArrayList();
-    ObservableList<Process> rTableList = FXCollections.observableArrayList();
-    ObservableList<Process> dTableList = FXCollections.observableArrayList();
+    ObservableList<Process> queueTableList = FXCollections.observableArrayList();
+    ObservableList<Process> rejectedTableList = FXCollections.observableArrayList();
+    ObservableList<Process> doneTableList = FXCollections.observableArrayList();
 
-    private ArrayList<TableColumn<Process, String>> genQTable()
+    private ArrayList<TableColumn<Process, String>> initQueueTable()
     {
         TableColumn<Process, String> idColumn= new TableColumn<>("ID");
         TableColumn<Process, String> nameColumn= new TableColumn<>("Name");
         TableColumn<Process, String> priorColumn= new TableColumn<>("Priority");
         TableColumn<Process, String> statusColumn= new TableColumn<>("Status");
-        TableColumn<Process, String> tickColumn = new TableColumn<>("TickWorks");
+        TableColumn<Process, String> tickColumn = new TableColumn<>("ticksExecuted");
+        TableColumn<Process, String> ticksNeededColumn= new TableColumn<>("ticksNeeded");
         TableColumn<Process, String> memColumn= new TableColumn<>("Memory");
-        TableColumn<Process, String> timeInColumn= new TableColumn<>("TimeIn");
-        TableColumn<Process, String> burstColumn= new TableColumn<>("BursTime");
+        TableColumn<Process, String> startTickColumn= new TableColumn<>("startTick");
+
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         priorColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-        tickColumn.setCellValueFactory(new PropertyValueFactory<>("tickWorks"));
+        tickColumn.setCellValueFactory(new PropertyValueFactory<>("ticksExecuted"));
         memColumn.setCellValueFactory(new PropertyValueFactory<>("memory"));
-        timeInColumn.setCellValueFactory(new PropertyValueFactory<>("timeIn"));
-        burstColumn.setCellValueFactory(new PropertyValueFactory<>("bursTime"));
+        startTickColumn.setCellValueFactory(new PropertyValueFactory<>("startTick"));
+        ticksNeededColumn.setCellValueFactory(new PropertyValueFactory<>("ticksNeeded"));
 
         priorColumn.setVisible(false);
-        tickColumn.setVisible(false);
+        //tickColumn.setVisible(false);
         memColumn.setVisible(false);
-        burstColumn.setVisible(false);
+        //ticksNeededColumn.setVisible(false);
 
         ArrayList<TableColumn<Process, String>> _tmp = new ArrayList<>();
         _tmp.add(idColumn);
@@ -67,71 +64,47 @@ public class Controller {
         _tmp.add(statusColumn);
         _tmp.add(tickColumn);
         _tmp.add(memColumn);
-        _tmp.add(timeInColumn);
-        _tmp.add(burstColumn);
+        _tmp.add(startTickColumn);
+        _tmp.add(ticksNeededColumn);
         return _tmp;
     }
 
-    public void updateTable(Queue q, ArrayList<Process> a)
+    public void updateTable(List<Process> activeProcesses, List<Process> terminatedProcesses)
     {
-        qTableList.setAll(q.getQueue());
-        queueTable.setItems(qTableList);
+        queueTableList.setAll(activeProcesses);
+        queueTable.setItems(queueTableList);
         queueTable.refresh();
 
-        rTableList.setAll(q.getRejectedQueue());
-        dTableList.setAll(a);
-
-        rejectedTable.setItems(rTableList);
-        rejectedTable.refresh();
-        doneTable.setItems(dTableList);
+        doneTableList.setAll(terminatedProcesses);
+        doneTable.setItems(doneTableList);
         doneTable.refresh();
     }
     @FXML
     Button runBTN;
-    @FXML
-    Button pauseBTN;
     @FXML
     Button stopBTN;
 
     @FXML
     protected void runBTN_Click()
     {
-
-        if(!Main.emuThread.isAlive())
-            Main.emuThread.start();
-        else
-            Main.emuThread.resume();
+        Main.emuThread = new Thread(new VirtualMachineLauncher());
+        Main.emuThread.start();
 
         runBTN.setDisable(true);
-        pauseBTN.setDisable(false);
-        stopBTN.setDisable(true);
+        stopBTN.setDisable(false);
     }
-
-//    @FXML
-//    protected void pauseBTN_Click()
-//    {
-//        if(Main.emuThread.isAlive())
-//            Main.emuThread.suspend();
-//
-//        pauseBTN.setDisable(true);
-//        runBTN.setDisable(false);
-//        stopBTN.setDisable(false);
-//    }
 
     @FXML
     protected void stopBTN_Click()
     {
-        if(Main.emuThread.isAlive())
-            Main.emuThread.stop();
+        if (Main.emuThread != null && Main.emuThread.isAlive()) {
+            Main.emuThread.interrupt();
+            Main.emuThread = null;
+        }
 
-        MemoryManager.clearMemory();
-        ClockGenerator.clearTime();
-        Main.emuThread = new Thread(new VirtualMachineLauncher());
         queueTable.setItems(null);
-        rejectedTable.setItems(null);
         doneTable.setItems(null);
 
-        pauseBTN.setDisable(true);
         runBTN.setDisable(false);
     }
 

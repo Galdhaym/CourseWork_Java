@@ -8,6 +8,6 @@ public class VirtualMachineLauncher implements Runnable {
     @Override
     public void run() {
         vm = new VirtualMachine();
-        vm.Start();
+        vm.start();
     }
 }

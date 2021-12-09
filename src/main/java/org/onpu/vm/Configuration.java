@@ -1,19 +1,13 @@
 package org.onpu.vm;
 
 public class Configuration {
-    public static final int coreCount = 2;
+    public static final int CPU_CORES = 2;
     public static int TOTAL_MEMORY = 2048;
-    public static int minValue = 10;
-    public static int initPCount = 12;
-    public static int PRmMultiplier = 2;
-    public static int rmOldPIterator = 2;
-    public static int maxPriority = 32;
-    public static float ZombieDiv = 2f;
-    public static int minProcName = 2;
-    public static int maxProcName = 7;
-    public static int minTickWork =3;
-    public static int maxTickWork =20;
-    public static int minMemsize =4;
-    public static int maxMemsize =300;
-    public static int tickIncrement= 1;
+    public static int MAX_RANDOM_PROCESSES = 10;
+    public static int MAX_PRIORITY = 3;
+    public static int MIN_PROCESS_DURATION = 3;
+    public static int MAX_PROCESS_DURATION = 20;
+    public static int MIN_PROCESS_MEMORY_SIZE = 4;
+    public static int MAX_PROCESS_MEMORY_SIZE = 300;
+    public static int TICK_DURATION = 2;
 }

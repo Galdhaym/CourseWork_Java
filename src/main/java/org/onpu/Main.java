@@ -21,8 +21,6 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/window/interface.fxml"));
         Parent root = loader.load();
         controller =  loader.getController();
-        emuThread = new Thread(new VirtualMachineLauncher());
-
 
         stage.setTitle("VTaskViewer");
         stage.setScene(new Scene(root, 800, 500));
@@ -34,8 +32,8 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        if(emuThread.isAlive())
-            emuThread.stop();
+        if(emuThread != null && emuThread.isAlive())
+            emuThread.interrupt();
     }
 
 }

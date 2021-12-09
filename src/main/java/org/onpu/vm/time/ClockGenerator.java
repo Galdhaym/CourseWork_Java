@@ -8,25 +8,28 @@ import java.util.TimerTask;
 public class ClockGenerator extends TimerTask {
     ArrayList<ClockListener> listenersList = new ArrayList<>();
 
+    private static boolean active = false;
     private static int tick;
     public static int getTick() {
         return tick;
     }
-    public static void TickUP(){
+    public static void nextTick(){
         tick++;
     }
-    public static void clearTime(){tick =0;}
+    public static void stop(){active = false; tick = 0;}
 
     @Override
     public void run() {
-        while (true)
+        active = true;
+        while (active)
         {
             try {
-                Thread.sleep(1000, Configuration.tickIncrement);
+                Thread.sleep(1000 * Configuration.TICK_DURATION);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                stop();
+                return;
             }
-            TickUP();
+            nextTick();
 
             for(ClockListener listener : listenersList)
                 listener.onTick();

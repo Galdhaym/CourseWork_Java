@@ -9,7 +9,7 @@ public class MemoryBlock {
     int end;
     Process process;
 
-    public static Comparator<org.onpu.vm.memory.MemoryBlock> byStart = Comparator.comparingInt(o -> o.start);
+    public static Comparator<MemoryBlock> byStart = Comparator.comparingInt(o -> o.start);
 
     public MemoryBlock(int start, int end, Process process) {
         this.start=start;

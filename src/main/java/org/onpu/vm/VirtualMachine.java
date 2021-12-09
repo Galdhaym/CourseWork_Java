@@ -11,19 +11,21 @@ import org.onpu.vm.time.ClockListener;
 import java.util.ArrayList;
 
 public class VirtualMachine implements ClockListener {
-    static ArrayList<Process> doneProcesses;
-    static Queue queue;
+    private ArrayList<Process> activeProcesses;
+    private ArrayList<Process> terminatedProcesses;
+    private CpuQueue cpuQueue;
+    private int PID = 0;
 
     CPU cpu;
     MemoryManager memoryManager;
     ClockGenerator clockGenerator;
 
     public VirtualMachine() {
-        queue = new Queue();
+        cpuQueue = new CpuQueue();
+        activeProcesses = new ArrayList<>();
+        terminatedProcesses = new ArrayList<>();
 
-        doneProcesses = new ArrayList<>();
-
-        this.cpu = new CPU(Configuration.coreCount);
+        this.cpu = new CPU(Configuration.CPU_CORES, this);
         this.memoryManager = new MemoryManager();
         this.clockGenerator = new ClockGenerator();
 
@@ -31,71 +33,61 @@ public class VirtualMachine implements ClockListener {
         this.clockGenerator.addListener(this);
     }
 
-    public void Start()
-    {
-        preLaunchInit();
+    public void start() {
         this.clockGenerator.run();
+
+        //after stopping generator
+        MemoryManager.clearMemory();
     }
 
-    private void preLaunchInit()
-    {
-//        MemoryManager.addMemoryBlock(new MemoryBlock(0,100,null));
-//
-        queue.Add(Configuration.initPCount);
+    public void createProcess(String name) {
+        PID++;
+        Process process = new Process(PID, name);
+        addProcess(process);
     }
 
-    private void addJob()
-    {
-        if(Utils.getRandBool()) {
-            queue.Add(Utils.getRandInt(Configuration.minValue));
-        }
-        updateTable();
+    public void createRandomProcess() {
+        PID++;
+        Process process = new Process(PID);
+        addProcess(process);
     }
 
-
-    @Override
-    public String toString() {
-        return "VirtualMachine{\n"+cpu+'\n'+ memoryManager +'\n'+queue+"\nDone:"+doneProcesses+"\n}";
-    }
-
-    public static void PDone(Process process)
-    {
-        if(Utils.getRandBool()) {
-            process.setStatus(Status.Finished);
-            doneProcesses.add(process);
-        }
-        else
-        {
-            process.setStatus(Status.Waiting);
-            queue.addProcess(process);
+    public void addProcess(Process process) {
+        if (cpuQueue.addProcess(process)) {
+            activeProcesses.add(process);
         }
     }
 
-    private void clearOutdated()
-    {
-        if(ClockGenerator.getTick()% Configuration.rmOldPIterator ==0) {
-            queue.cancelOutdated();
-        }
-    }
-
-    private void setJobToCPU()
-    {
-        for (int i = 0; i< Configuration.coreCount; i++) {
-            int _tmpInt = cpu.getFreeCore();
-            if (_tmpInt >= 0) {
-                cpu.setCoreJob(_tmpInt, queue.getNextProcess());
+    private void addRandomProcesses() {
+        if (Utils.getRandBool()) {
+            for (int i = 0; i <Configuration.MAX_RANDOM_PROCESSES; i++) {
+                createRandomProcess();
             }
         }
     }
 
-    public void updateTable()
-    {
-        Main.controller.updateTable(queue,doneProcesses);}
+    @Override
+    public String toString() {
+        return "VirtualMachine{\n" + cpu + '\n' + memoryManager + '\n' + cpuQueue + "\nDone:" + terminatedProcesses + "\n}";
+    }
+
+    public CpuQueue getCpuQueue() {
+        return cpuQueue;
+    }
+
+    public void terminateProcess(Process process) {
+        process.setStatus(Status.terminated);
+        activeProcesses.remove(process);
+        terminatedProcesses.add(process);
+    }
+
+    public void updateTable() {
+        Main.controller.updateTable(activeProcesses, terminatedProcesses);
+    }
 
     @Override
     public void onTick() {
-        clearOutdated();
-        setJobToCPU();
-        addJob();
+        addRandomProcesses();
+        updateTable();
     }
 }

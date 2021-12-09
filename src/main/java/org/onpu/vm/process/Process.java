@@ -4,40 +4,48 @@ import org.onpu.vm.Configuration;
 import org.onpu.vm.Utils;
 import org.onpu.vm.time.ClockGenerator;
 
-import java.util.Comparator;
-
 public class Process {
-    private int id;        //after create
-    private String name;    //rand
-    private int priority;  //rand + on work
-    private Status status;    //rand + on work
-    private int tickWorks;       //rand
-    private int memorySize;     //rand
-    private final int timeIn;     //after create
-    private int bursTime;   //on work
+    private int id;
+    private String name;
+    private int priority;
+    private Status status;
+    private int ticksNeeded;
+    private int memorySize;
+    private final int startTick;
+    private int ticksExecuted;
+
+    public Process(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.memorySize = Utils.getRandInt(Configuration.MIN_PROCESS_MEMORY_SIZE, Configuration.MAX_PROCESS_MEMORY_SIZE);
+        this.priority= Utils.getRandInt(Configuration.MAX_PRIORITY);
+        this.startTick = ClockGenerator.getTick();
+        this.ticksNeeded = Utils.getRandInt(Configuration.MIN_PROCESS_DURATION, Configuration.MAX_PROCESS_DURATION);
+        this.ticksExecuted = 0;
+        this.status = Status.ready;
+    }
 
     public Process(int id) {
-        this.id = id;
-        this.name = "Proc-"+id;
-        this.memorySize = Utils.getRandInt(Configuration.minMemsize, Configuration.maxMemsize);
-        this.priority= Utils.getRandInt(Configuration.maxPriority);
-        this.tickWorks = Utils.getRandInt(Configuration.minTickWork, Configuration.maxTickWork);
-        this.timeIn = ClockGenerator.getTick();
-        this.bursTime=0;
-        this.status = Status.Ready;
+        this(id, "proc-"+id);
     }
-    //________Setters________\\
 
     public void setStatus(Status status) {
         this.status = status;
     }
 
-    public void setBursTime(int bursTime) {
-        this.bursTime = bursTime;
+    public int incExecutedTicks() {
+        ticksExecuted++;
+        System.out.println("Increment ticks for PID " + id + ": " + ticksExecuted);
+        return ticksExecuted;
     }
 
-    //________Getters________\\
+    public void start() {
+        setStatus(Status.running);
+    }
 
+    public boolean isCompleted(){
+        return ticksExecuted == ticksNeeded;
+    }
 
     public int getId() {
         return id;
@@ -51,28 +59,24 @@ public class Process {
         return priority;
     }
 
-    public int getTickWorks() {
-        return tickWorks;
+    public int getTicksNeeded() {
+        return ticksNeeded;
     }
 
     public int getMemorySize() {
         return memorySize;
     }
 
-    public int getTimeIn() {
-        return timeIn;
+    public int getStartTick() {
+        return startTick;
     }
 
-    public int getBursTime() {
-        return bursTime;
+    public int getTicksExecuted() {
+        return ticksExecuted;
     }
 
     public Status getStatus(){return status;}
 
-
-    public static Comparator<org.onpu.vm.process.Process> byPriority = Comparator.comparingInt(o -> o.priority);
-
-    //________toString________\\
 
     @Override
     public String toString() {
@@ -81,10 +85,10 @@ public class Process {
                 "\tname=" + name +
                 "\tpriority=" + priority +
                 "\tstate=" + status +
-                "\ttick=" + tickWorks +
+                "\ttick=" + ticksNeeded +
                 "\tmemory=" + memorySize +
-                "\ttimeIn=" + timeIn +
-                "\tbursTime=" + bursTime+'\n';
+                "\tstartTick=" + startTick +
+                "\tticksExecuted=" + ticksExecuted +'\n';
     }
 
 }
