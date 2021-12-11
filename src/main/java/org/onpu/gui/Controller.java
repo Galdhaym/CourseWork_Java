@@ -52,11 +52,6 @@ public class Controller {
         startTickColumn.setCellValueFactory(new PropertyValueFactory<>("startTick"));
         ticksNeededColumn.setCellValueFactory(new PropertyValueFactory<>("ticksNeeded"));
 
-        priorColumn.setVisible(false);
-        //tickColumn.setVisible(false);
-        memColumn.setVisible(false);
-        //ticksNeededColumn.setVisible(false);
-
         ArrayList<TableColumn<Process, String>> _tmp = new ArrayList<>();
         _tmp.add(idColumn);
         _tmp.add(nameColumn);
