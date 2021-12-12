@@ -22,7 +22,7 @@ public class Main extends Application {
         Parent root = loader.load();
         controller =  loader.getController();
 
-        stage.setTitle("VTaskViewer");
+        stage.setTitle("Computer");
         stage.setScene(new Scene(root, 800, 500));
         stage.show();
 

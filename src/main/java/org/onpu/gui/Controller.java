@@ -29,7 +29,6 @@ public class Controller {
     TableView<Process> doneTable;
 
     ObservableList<Process> queueTableList = FXCollections.observableArrayList();
-    ObservableList<Process> rejectedTableList = FXCollections.observableArrayList();
     ObservableList<Process> doneTableList = FXCollections.observableArrayList();
 
     private ArrayList<TableColumn<Process, String>> initQueueTable()
@@ -48,7 +47,7 @@ public class Controller {
         priorColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         tickColumn.setCellValueFactory(new PropertyValueFactory<>("ticksExecuted"));
-        memColumn.setCellValueFactory(new PropertyValueFactory<>("memory"));
+        memColumn.setCellValueFactory(new PropertyValueFactory<>("memorySize"));
         startTickColumn.setCellValueFactory(new PropertyValueFactory<>("startTick"));
         ticksNeededColumn.setCellValueFactory(new PropertyValueFactory<>("ticksNeeded"));
 
